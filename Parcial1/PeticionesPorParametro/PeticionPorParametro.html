@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chistes de Chuck Norris</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col">
+            <label for="chistes">Selecciona una categoría de chistes:</label>
+            <select class="form-control" name="Chistes" id="chistes"></select>
+        </div>
+        <div class="col">
+            <button class="btn btn-primary" id="Peticion">Pedir Chiste</button>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <div id="chisteDiv" class="alert alert-info" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function () {
+        fetch('https://api.chucknorris.io/jokes/categories')
+            .then(response => response.json())
+            .then((data) => {
+                let chistes = data;
+                let select = document.getElementById('chistes');
+                chistes.forEach(categoria => {
+                    let opcion = document.createElement('option');
+                    opcion.value = categoria;
+                    opcion.text = categoria;
+                    select.appendChild(opcion);
+                });
+            });
+
+        document.getElementById('Peticion').addEventListener("click", async () => {
+            let categoriaSeleccionada = document.getElementById('chistes').value;
+            let url = 'https://api.chucknorris.io/jokes/random?category=' + categoriaSeleccionada;
+            let response = await fetch(url);
+            let data = await response.json();
+            let chiste = data.value;
+
+            let chisteDiv = document.getElementById('chisteDiv');
+            chisteDiv.textContent = chiste;
+            chisteDiv.style.display = 'block';
+        });
+    };
+</script>
+
+</body>
+</html>

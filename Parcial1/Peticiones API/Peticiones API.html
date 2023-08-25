@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Peticiones Pokémon</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <label for="pokemons">Selecciona un Pokémon:</label>
+                <select class="form-control" name="Pokemons" id="pokemons"></select>
+            </div>
+            <div class="col-md-6 text-center">
+                <button class="btn btn-primary" id="btnXMLHttp">XMLHttp</button>
+                <button class="btn btn-primary" id="btnJQueryAjax">JQuery</button>
+                <button class="btn btn-primary" id="btnFetch">Fetch</button>
+                <button class="btn btn-primary" id="btnAxios">Axios</button>
+                <button class="btn btn-primary" id="btnAsyncAwait">Async Await</button>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div id="infoDiv" class="alert alert-info text-center" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        window.onload = function () {
+            fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0')
+                .then(response => response.json())
+                .then((data) => {
+                    let pokemons = data.results;
+                    let select = document.getElementById('pokemons');
+                    pokemons.forEach(pokemon => {
+                        let opcion = document.createElement('option');
+                        opcion.value = pokemon.name;
+                        opcion.text = pokemon.name;
+                        select.appendChild(opcion);
+                    });
+                });
+
+            document.getElementById('btnXMLHttp').addEventListener("click", function() {
+                let pokemonSeleccionado = document.getElementById('pokemons').value;
+                let solicitud = new XMLHttpRequest();
+                solicitud.responseType = 'json';
+                solicitud.onload = function () {
+                    let data = solicitud.response;
+                    mostrarInformacionPokemon(data);
+                }
+                solicitud.open("GET", `https://pokeapi.co/api/v2/pokemon/${pokemonSeleccionado}`, true);
+                solicitud.send();
+            });
+
+            document.getElementById('btnJQueryAjax').addEventListener("click", function() {
+                let pokemonSeleccionado = document.getElementById('pokemons').value;
+                $.ajax({
+                    url: `https://pokeapi.co/api/v2/pokemon/${pokemonSeleccionado}`
+                })
+                .done(function (data) {
+                    mostrarInformacionPokemon(data);
+                });
+            });
+
+            document.getElementById('btnFetch').addEventListener("click", function() {
+                let pokemonSeleccionado = document.getElementById('pokemons').value;
+                fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonSeleccionado}`)
+                .then(response => response.json())
+                .then(data => {
+                    mostrarInformacionPokemon(data);
+                });
+            });
+
+            document.getElementById('btnAxios').addEventListener("click", function() {
+                let pokemonSeleccionado = document.getElementById('pokemons').value;
+                axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonSeleccionado}`)
+                .then(function (response) {
+                    mostrarInformacionPokemon(response.data);
+                });
+            });
+
+            document.getElementById('btnAsyncAwait').addEventListener("click", async function() {
+                let pokemonSeleccionado = document.getElementById('pokemons').value;
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonSeleccionado}`);
+                const data = await response.json();
+                mostrarInformacionPokemon(data);
+            });
+
+            function mostrarInformacionPokemon(data) {
+                let infoDiv = document.getElementById('infoDiv');
+                infoDiv.innerHTML = `
+                    <h2>${data.name.toUpperCase()}</h2>
+                    <img src="${data.sprites.front_default}" alt="${data.name}" />
+                    <p>Altura: ${data.height}</p>
+                    <p>Peso: ${data.weight}</p>
+                    <p>Tipo: ${data.types.map(type => type.type.name).join(', ')}</p>
+                `;
+                infoDiv.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
