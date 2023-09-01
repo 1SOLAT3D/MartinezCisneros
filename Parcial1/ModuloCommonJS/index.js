@@ -1,7 +1,7 @@
-let frases=[ "Frase 1: Hola", "Frase 2: Como estás? :3", "Frase 3: Adios <3" ]
+let frases = ["Frase 1: Hola", "Frase 2: Como estás? :3", "Frase 3: Adios <3"];
 
 export function obtieneFrase(indice) {
-    return frases(indice);
+  return frases(indice);
 }
 
-module.exports.obtieneFrase=obtieneFrase;
+module.exports.obtieneFrase = obtieneFrase;
