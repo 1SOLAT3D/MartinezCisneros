@@ -3,7 +3,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/alumnos/:carrera", (req, res) => {
+app.get("/alumnos", (req, res) => {
     console.log(req.params);
     console.log(req.query);
     console.log(req.body);
