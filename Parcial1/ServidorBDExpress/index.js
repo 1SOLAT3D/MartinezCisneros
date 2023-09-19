@@ -3,9 +3,11 @@ const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
 const mysql = require("mysql2/promise");
+const cors = require("cors");
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 function validarIdEquipo(req, res, next) {
   const idEquipo = req.params.idEquipo;

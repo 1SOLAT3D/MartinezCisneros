@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid.js Fetch API</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css">
+</head>
+<body>
+    <div id="tabla"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('http://localhost:8080/lec2023')
+                .then(response => response.json())
+                .then(data => {
+                    new gridjs.Grid({
+                        columns: [
+                            { id: 'id', name: 'ID' },
+                            { id: 'nombre', name: 'Nombre' },
+                            { id: 'pais', name: 'País' }
+                        ],
+                        data: data,
+                        sort: true,
+                    }).render(document.getElementById('tabla'));
+                })
+                .catch(error => {
+                    console.error('Error al obtener los datos:', error);
+                });
+        });
+    </script>
+    <script src="./node_modules/gridjs/dist/gridjs.umd.js"></script>
+</body>
+</html>
