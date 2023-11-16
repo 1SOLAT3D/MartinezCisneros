@@ -23,6 +23,39 @@
             "description": "Error en el servidor"
           }
         }
+      },
+      "post": {
+        "summary": "Crea un nuevo equipo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "acronimo": {
+                    "type": "string"
+                  },
+                  "pais": {
+                    "type": "string"
+                  }
+                },
+                "required": ["nombre", "acronimo", "pais"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Equipo creado correctamente"
+          },
+          "400": {
+            "description": "Faltan campos obligatorios en la solicitud"
+          }
+        }
       }
     },
     "/lec2023/{idEquipo}": {
@@ -114,41 +147,6 @@
           },
           "404": {
             "description": "El equipo no fue encontrado"
-          }
-        }
-      }
-    },
-    "/lec2023": {
-      "post": {
-        "summary": "Crea un nuevo equipo",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nombre": {
-                    "type": "string"
-                  },
-                  "acronimo": {
-                    "type": "string"
-                  },
-                  "pais": {
-                    "type": "string"
-                  }
-                },
-                "required": ["nombre", "acronimo", "pais"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Equipo creado correctamente"
-          },
-          "400": {
-            "description": "Faltan campos obligatorios en la solicitud"
           }
         }
       }
