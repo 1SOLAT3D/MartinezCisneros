@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "aphelios-package": "^1.0.0",
+    "jsdoc": "^4.0.2"
+  },
+  "name": "frasesjson",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "doc": "jsdoc -c jsdoc.json --readme 'README.md' "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
