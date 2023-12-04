@@ -100,3 +100,5 @@ app.use(
 app.listen(8080, () => {
   console.log("Servidor Express escuchando en el puerto 8080");
 });
+
+module.exports = app;

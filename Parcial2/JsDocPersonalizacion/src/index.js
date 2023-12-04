@@ -28,8 +28,3 @@ export function GetRazaAventurero(indice) {
         throw new Error("El índice debe ser un valor entero.");
     }
 }
-
-//console.log(module);
-
-//Es un modulo CommunJs
-//module.exports.GetRazaAventurero = GetRazaAventurero;

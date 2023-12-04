@@ -1,218 +1,163 @@
-const express = require('express');
+const express = require("express");
+const cors = require('cors');
+const mysql2 = require("mysql2/promise");
+
 const app = express();
-var cors = require('cors');
-const morgan = require('morgan');
-const fs = require('fs');
-const path = require('path');
-var mysql2 = require('mysql2/promise');
-const bodyParser = require("body-parser"); //sin uso
-const multer = require('multer');
+const port = 8080;
 
-//const multer = require('multer')
-const upload = multer()
+const dbConfig = {
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "lec2023",
+};
 
-
-app.use(express.json())
 app.use(cors());
 
-var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
- 
-    // setup the logger
-    app.use(morgan('combined', { stream: accessLogStream }))
-    
-    app.get('/', function (req, res) {
-    res.send('hello, world!')
+app.use(express.json());
+
+app.get("/lec2023", async (req, res) => {
+  try {
+    const connection = await mysql2.createConnection(dbConfig);
+    const [results, fields] = await connection.query("SELECT * FROM equipo");
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
 });
 
+app.get("/lec2023/:idEquipo", async (req, res) => {
+  try {
+    const connection = await mysql2.createConnection(dbConfig);
+    const [results, fields] = await connection.query(
+      "SELECT * FROM equipo WHERE id = ?",
+      [req.params.idEquipo]
+    );
 
+    if (results.length === 0) {
+      return res.status(404).json({ resultado: "El equipo no fue encontrado" });
+    }
 
-const dataDeBase = {
-    host: 'localhost', 
-    user: 'root',
-    password: '',
-    database: 'ejemplo'
-}
-app.get("/alumnos",async (req,resp)=>{
-    try{
-        //req.query o req.body o red.params
-        const conexion = await mysql2.createConnection(dataDeBase);
-        const [rows, fields] = await conexion.query('select * from ejemplo.nombre ');
-        if(rows.length == 0){
-            resp.status(404);
-            resp.json({mensaje:"Usuario no existe"})
-        }else{
-            resp.json(rows);
-        }
-    }catch(err){
-        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
-    }
-    
-});
-app.get("/alumnos/:id",async (req,resp)=>{
-    try{
-        //req.query o req.body o red.params
-        console.log(req.params.id);
-        const conexion = await mysql2.createConnection(dataDeBase);
-        const [rows, fields] = await conexion.query('select * from ejemplo.nombre where id='+req.params.id);
-        if(rows.length == 0){
-            resp.status(404);
-            resp.json({mensaje:"Usuario no existe"})
-        }else{
-            resp.json(rows);
-        }
-    }catch(err){
-        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
-    }
-    
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
 });
 
-// Configura multer para manejar formularios multipart
-//const storage = multer.diskStorage({
-//    destination: function (req, file, cb) {
-//      cb(null, '/tmp/my-uploads')
-//    },
-//    filename: function (req, file, cb) {
-//      cb(null, file.fieldname + '-' + Date.now())
-//    }
-//})
-//  
-//const upload = multer({ storage: storage })
-app.use(express.urlencoded({ extended: true }));
-
-app.post("/Alumnos", upload.none() ,async (req, resp) => {
-    try {
-        let nombre,apellido;
-        if (!(typeof req.query.nombre === "undefined") || !(typeof apellido === "undefined")){
-            nombre = req.query.nombre;
-            apellido = req.query.apellido;
-        }else
-        {
-            console.log(req.body) // [Object: null prototype] { nombre: 'Rey', apellido: 'Misterio' }
-            const cadena = JSON.parse(JSON.stringify(req.body)); // { nombre: 'Rey', apellido: 'Misterio' }
-            nombre = req.body.nombre; //Rey
-            apellido = req.body.apellido; //Misterio
-            console.log(nombre)
-            console.log(apellido)
-        }
-        if (typeof nombre === "undefined" || typeof apellido === "undefined") {
-            resp.status(400).json({ mensaje: "Los campos 'nombre' y 'apellido' son obligatorios" });
-            return;
-        }
-
-        const conexion = await mysql2.createConnection(dataDeBase);
-        const sql = 'INSERT INTO ejemplo.nombre (nombre, apellido) VALUES (?, ?)';
-        const [result] = await conexion.execute(sql, [nombre, apellido]);
-
-        if (result.affectedRows === 1) {
-            resp.status(201).json({ mensaje: "Alumno creado exitosamente" });
-        } else {
-            resp.status(500).json({ mensaje: "Error al crear el alumno" });
-        }
-    } catch (err) {
-        resp.status(500).json({ mensaje: "Error de conexión", tipo: err.message, sql: err.sqlMessage });
+app.post("/lec2023", async (req, res) => {
+  try {
+    const { nombre, acronimo, pais } = req.body;
+    if (!nombre || !acronimo || !pais) {
+      return res
+        .status(400)
+        .json({ mensaje: "Faltan campos obligatorios en la solicitud" });
     }
+
+    const connection = await mysql2.createConnection(dbConfig);
+    const sql = "INSERT INTO equipo (nombre, acronimo, pais) VALUES (?, ?, ?)";
+    const [result] = await connection.execute(sql, [nombre, acronimo, pais]);
+
+    if (result.affectedRows === 1) {
+      res.status(201).json({ resultado: "Equipo creado exitosamente" });
+    } else {
+      res.status(500).json({ error: "Error al crear el equipo" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
 });
 
-app.delete("/alumnos",async (req,resp)=>{
-    try{
-        const variable = req.query.idUsuario;
-        console.log(variable);
-        const conexion = await mysql2.createConnection(dataDeBase);
-        const queryy = 'delete from ejemplo.nombre where id='+variable;
-        console.log(queryy);
-        const [rows, fields] = await conexion.query(queryy);
-        if(rows.affectedRows == 0){
-            resp.json({mensaje:"Registro no eliminado"});
-        }else{
-            resp.json({mensaje:"Registro eliminado"});
-        }
-    }catch(err){
-        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
+app.delete("/lec2023/:idEquipo", async (req, res) => {
+  try {
+    const connection = await mysql2.createConnection(dbConfig);
+    const [results, fields] = await connection.execute(
+      "DELETE FROM equipo WHERE id = ?",
+      [req.params.idEquipo]
+    );
+
+    if (results.affectedRows === 1) {
+      res.json({ resultado: "Equipo eliminado exitosamente" });
+    } else {
+      res.status(404).json({ resultado: "El equipo no fue encontrado" });
     }
-    
-});
-app.put("/alumnos",async (req,resp)=>{
-    try{
-        const variable = parseInt(req.query.IdUsuario);
-        const objeto = req.body;
-        if (typeof variable !== 'number') {
-            throw new Error('La variable no es un número.');
-        }
-        const conexion = await mysql2.createConnection(dataDeBase);
-        
-        let campos =  Object.keys(objeto);
-        
-        let sentenciasql = "";
-        let cadenaUpdate = "update ejemplo.nombre "
-        let cadenaSet = "SET ";
-        let cadenaWhere = " where ";
-        
-        sentenciasql += cadenaUpdate + cadenaSet;
-        let x = 1;
-        campos.forEach(capos=>{
-            if(x != 1)
-            {
-                sentenciasql += ", "
-            }
-            //console.log(capos+'='+objeto[capos]);
-            if(typeof objeto[capos] === 'string')
-            {
-                sentenciasql += capos + "='" + objeto[capos] + "'";
-            }else
-            {
-                sentenciasql += capos+'='+objeto[capos]
-            }
-            x =2;
-        });
-        sentenciasql += cadenaWhere
-        sentenciasql += campos[0]+' = '+variable;
-        console.log(sentenciasql);
-        const [rows, fields] = await conexion.query(sentenciasql);
-        if(rows.affectedRows == 0){
-            resp.json({mensaje:"Registro sin cambios"});
-        }else{
-            resp.json({mensaje:"Registro tuvo cambios"});
-        }
-    }catch(err){
-        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
-    }
-    
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
 });
 
-app.patch("/alumnos/:id", async (req, resp) => {
-    try {
-      const variable = parseInt(req.query.IdUsuario);
-      const conexion = await mysql2.createConnection(dataDeBase);
-      const sql = 'UPDATE ejemplo.nombre SET nombre = ?, apellido = ? WHERE id = ?';
-      const { nombre, apellido } = req.body;
-      const [result] = await conexion.execute(sql, [nombre, apellido, variable]);
-      
-      if (result.affectedRows === 0) {
-        resp.status(404).json({ mensaje: "Usuario no encontrado" });
-      } else {
-        resp.json({ mensaje: "Usuario actualizado exitosamente" });
-      }
-    } catch (err) {
-      resp.status(500).json({ mensaje: "Error de conexión", tipo: err.message, sql: err.sqlMessage });
+app.put("/lec2023/:idEquipo", async (req, res) => {
+  try {
+    const { nombre, acronimo, pais } = req.body;
+    if (!nombre || !acronimo || !pais) {
+      return res
+        .status(400)
+        .json({ mensaje: "Faltan campos obligatorios en la solicitud" });
     }
-  });
-app.get("/alumnos/:id",async (req,resp)=>{
-    try{
-        //req.query o req.body o red.params
-        console.log(req.params.id);
-        const conexion = await mysql2.createConnection(dataDeBase);
-        const [rows, fields] = await conexion.query('select * from ejemplo.nombre where id='+req.params.id);
-        if(rows.length == 0){
-            resp.status(404);
-            resp.json({mensaje:"Usuario no existe"})
-        }else{
-            resp.json(rows);
-        }
-    }catch(err){
-        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
+
+    const connection = await mysql2.createConnection(dbConfig);
+    const sql =
+      "UPDATE equipo SET nombre = ?, acronimo = ?, pais = ? WHERE id = ?";
+    const [results] = await connection.execute(sql, [
+      nombre,
+      acronimo,
+      pais,
+      req.params.idEquipo,
+    ]);
+
+    if (results.affectedRows === 1) {
+      res.json({ resultado: "Equipo actualizado exitosamente" });
+    } else {
+      res.status(404).json({ resultado: "El equipo no fue encontrado" });
     }
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
 });
 
-app.listen(8080,(req,resp)=>{
-    console.log("Servidor express escuchando");
+app.patch("/lec2023/:idEquipo", async (req, res) => {
+  try {
+    const { nombre, acronimo, pais } = req.body;
+
+    if (!nombre && !acronimo && !pais) {
+      return res
+        .status(400)
+        .json({ mensaje: "Se requiere al menos un campo para actualizar" });
+    }
+
+    const connection = await mysql2.createConnection(dbConfig);
+    const updates = [];
+    const params = [];
+
+    if (nombre) {
+      updates.push("nombre = ?");
+      params.push(nombre);
+    }
+
+    if (acronimo) {
+      updates.push("acronimo = ?");
+      params.push(acronimo);
+    }
+
+    if (pais) {
+      updates.push("pais = ?");
+      params.push(pais);
+    }
+
+    params.push(req.params.idEquipo);
+
+    const sql = `UPDATE equipo SET ${updates.join(", ")} WHERE id = ?`;
+    const [results] = await connection.execute(sql, params);
+
+    if (results.affectedRows === 1) {
+      res.json({ resultado: "Equipo actualizado parcialmente" });
+    } else {
+      res.status(404).json({ resultado: "El equipo no fue encontrado" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Servidor express escuchando en el puerto ${port}`);
 });

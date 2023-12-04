@@ -1,15 +1,9 @@
 const express = require('express');
 const app = express();
-//var cors = require('cors');
 const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
-//var mysql2 = require('mysql2/promise');
-//const multer = require('multer');
-
-//const multer = require('multer')
-//const upload = multer()
 const rte = require('./lec2023.js')
 
 

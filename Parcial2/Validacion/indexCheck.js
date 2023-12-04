@@ -1,21 +1,20 @@
 const express = require('express');
-const {validationResult, checkSchema } = require("express-validator")
+const { validationResult, checkSchema } = require('express-validator');
 const { schema } = require('./esquema');
 const app = express();
 
 app.use(express.json());
 
-app.post('/Alumnos/', checkSchema(schema), (req, res) => {
+app.post('/lec2023', checkSchema(schema), (req, res) => {
   const result = validationResult(req);
   if (result.isEmpty()) {
     console.log(req.body);
-    return res.send(`Hello, ${req.body}!`);
+    return res.send(`Hello, ${JSON.stringify(req.body)}!`);
   } else {
     res.json(result);
   }
 });
 
-
-app.listen(8080,()=>{
-    console.log("Servidor express escuchando 8080"); 
-})
+app.listen(8080, () => {
+  console.log('Servidor express escuchando 8080');
+});

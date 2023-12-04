@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
 
+// Obtiene la ruta de la carpeta actual
 const currentDirectory = process.cwd();
 
+// Función para obtener las carpetas en una ruta dada
 async function getFolders(dir) {
   const files = await fs.readdir(dir);
   return files.filter(async (file) => {
