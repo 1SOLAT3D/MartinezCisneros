@@ -1,0 +1,7 @@
+::1 - - [03/Dec/2023:22:47:00 +0000] "OPTIONS /lec2023 HTTP/1.1" 200 24 "http://127.0.0.1:5500/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+::1 - - [03/Dec/2023:22:48:08 +0000] "OPTIONS /lec2023 HTTP/1.1" 200 24 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+::1 - - [03/Dec/2023:22:49:32 +0000] "GET /lec2023 HTTP/1.1" 200 31 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+::1 - - [03/Dec/2023:22:51:21 +0000] "GET /lec2023 HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+::1 - - [03/Dec/2023:22:54:13 +0000] "GET /lec2023 HTTP/1.1" 200 711 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+::1 - - [03/Dec/2023:22:54:18 +0000] "GET /lec2023 HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+::1 - - [03/Dec/2023:22:54:25 +0000] "GET /lec2023/1 HTTP/1.1" 200 66 "http://localhost/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"

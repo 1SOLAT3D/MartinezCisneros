@@ -1,151 +1,218 @@
-const express = require("express");
-const morgan = require("morgan");
-const fs = require("fs");
-const path = require("path");
-const mysql = require("mysql2/promise");
-const cors = require("cors");
-const multer =  requirte('multer'); 
+const express = require('express');
 const app = express();
+var cors = require('cors');
+const morgan = require('morgan');
+const fs = require('fs');
+const path = require('path');
+var mysql2 = require('mysql2/promise');
+const bodyParser = require("body-parser"); //sin uso
+const multer = require('multer');
 
-app.use(express.json());
+//const multer = require('multer')
+const upload = multer()
+
+
+app.use(express.json())
 app.use(cors());
 
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
  
+    // setup the logger
     app.use(morgan('combined', { stream: accessLogStream }))
     
     app.get('/', function (req, res) {
     res.send('hello, world!')
 });
 
-function validarIdEquipo(req, res, next) {
-  const idEquipo = req.params.idEquipo;
-  if (!idEquipo || isNaN(idEquipo)) {
-    return res.status(400).json({ mensaje: "El parámetro idEquipo es invalido" });
-  }
-  next();
+
+
+const dataDeBase = {
+    host: 'localhost', 
+    user: 'root',
+    password: '',
+    database: 'ejemplo'
 }
-
-app.get('/lec2023', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'lec2023'
-    });
-
-    const [results, fields] = await connection.execute('SELECT * FROM equipo');
-    res.json(results);
-  } catch (error) {
-    res.json(error);
-  }
-});
-
-app.get('/lec2023/:idEquipo', validarIdEquipo, async (req, res) => {
-  try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'lec2023'
-    });
-
-    const [results, fields] = await connection.execute(`SELECT * FROM equipo WHERE id=${req.params.idEquipo}`);
+app.get("/alumnos",async (req,resp)=>{
+    try{
+        //req.query o req.body o red.params
+        const conexion = await mysql2.createConnection(dataDeBase);
+        const [rows, fields] = await conexion.query('select * from ejemplo.nombre ');
+        if(rows.length == 0){
+            resp.status(404);
+            resp.json({mensaje:"Usuario no existe"})
+        }else{
+            resp.json(rows);
+        }
+    }catch(err){
+        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
+    }
     
-    if (results.length === 0) {
-      return res.status(404).json({
-        resultado: "El equipo no fue encontrado"
-      });
-    }
-
-    res.json(results);
-  } catch (error) {
-    res.json(error);
-  }
 });
-
-
-app.delete('/lec2023/equipo/:idEquipo', validarIdEquipo, async (req, res) => {
-  try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'lec2023'
-    });
-
-    const [results, fields] = await connection.execute(`DELETE FROM equipo WHERE id=${req.params.idEquipo}`);
-
-    if (results.affectedRows == 1) {
-      res.json({
-        resultado: 'Equipo borrado'
-      });
-    } else {
-      res.status(404).json({
-        resultado: "El equipo no fue encontrado"
-      });
+app.get("/alumnos/:id",async (req,resp)=>{
+    try{
+        //req.query o req.body o red.params
+        console.log(req.params.id);
+        const conexion = await mysql2.createConnection(dataDeBase);
+        const [rows, fields] = await conexion.query('select * from ejemplo.nombre where id='+req.params.id);
+        if(rows.length == 0){
+            resp.status(404);
+            resp.json({mensaje:"Usuario no existe"})
+        }else{
+            resp.json(rows);
+        }
+    }catch(err){
+        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
     }
-  } catch (error) {
-    res.json(error);
-  }
-});
-
-app.post('/lec2023', async (req, res) => {
-  try {
-    if (!req.body.nombre || !req.body.acronimo || !req.body.pais) {
-      return res.status(400).json({ mensaje: "Faltan campos obligatorios en la solicitud" });
-    }
-
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'lec2023'
-    });
-
-    const sentenciaSQL = `INSERT INTO equipo (nombre, acronimo, pais) VALUES (?, ?, ?)`;
-    const [results, fields] = await connection.execute(sentenciaSQL, [req.body.nombre, req.body.acronimo, req.body.pais]);
-    res.json(results);
-  } catch (error) {
-    res.json(error);
-  }
-});
-
-app.put('/lec2023/:idEquipo', validarIdEquipo, async (req, res) => {
-  try {
-    if (!req.body.nombre || !req.body.acronimo || !req.body.pais) {
-      return res.status(400).json({ mensaje: "Faltan campos obligatorios en la solicitud" });
-    }
-
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'lec2023'
-    });
-
-    const sentenciaSQL = `UPDATE equipo SET nombre=?, acronimo=?, pais=? WHERE id=?`;
-    const [results, fields] = await connection.execute(sentenciaSQL, [req.body.nombre, req.body.acronimo, req.body.pais, req.params.idEquipo]);
     
-    if (results.affectedRows == 1) {
-      res.json({
-        resultado: 'Equipo actualizado'
-      });
-    } else {
-      res.status(404).json({
-        resultado: "El equipo no fue encontrado"
-      });
+});
+
+// Configura multer para manejar formularios multipart
+//const storage = multer.diskStorage({
+//    destination: function (req, file, cb) {
+//      cb(null, '/tmp/my-uploads')
+//    },
+//    filename: function (req, file, cb) {
+//      cb(null, file.fieldname + '-' + Date.now())
+//    }
+//})
+//  
+//const upload = multer({ storage: storage })
+app.use(express.urlencoded({ extended: true }));
+
+app.post("/Alumnos", upload.none() ,async (req, resp) => {
+    try {
+        let nombre,apellido;
+        if (!(typeof req.query.nombre === "undefined") || !(typeof apellido === "undefined")){
+            nombre = req.query.nombre;
+            apellido = req.query.apellido;
+        }else
+        {
+            console.log(req.body) // [Object: null prototype] { nombre: 'Rey', apellido: 'Misterio' }
+            const cadena = JSON.parse(JSON.stringify(req.body)); // { nombre: 'Rey', apellido: 'Misterio' }
+            nombre = req.body.nombre; //Rey
+            apellido = req.body.apellido; //Misterio
+            console.log(nombre)
+            console.log(apellido)
+        }
+        if (typeof nombre === "undefined" || typeof apellido === "undefined") {
+            resp.status(400).json({ mensaje: "Los campos 'nombre' y 'apellido' son obligatorios" });
+            return;
+        }
+
+        const conexion = await mysql2.createConnection(dataDeBase);
+        const sql = 'INSERT INTO ejemplo.nombre (nombre, apellido) VALUES (?, ?)';
+        const [result] = await conexion.execute(sql, [nombre, apellido]);
+
+        if (result.affectedRows === 1) {
+            resp.status(201).json({ mensaje: "Alumno creado exitosamente" });
+        } else {
+            resp.status(500).json({ mensaje: "Error al crear el alumno" });
+        }
+    } catch (err) {
+        resp.status(500).json({ mensaje: "Error de conexión", tipo: err.message, sql: err.sqlMessage });
     }
-  } catch (error) {
-    res.json(error);
-  }
 });
 
-app.use((err, req, res, next) => {
-  res.status(500).json({ error: err.message });
+app.delete("/alumnos",async (req,resp)=>{
+    try{
+        const variable = req.query.idUsuario;
+        console.log(variable);
+        const conexion = await mysql2.createConnection(dataDeBase);
+        const queryy = 'delete from ejemplo.nombre where id='+variable;
+        console.log(queryy);
+        const [rows, fields] = await conexion.query(queryy);
+        if(rows.affectedRows == 0){
+            resp.json({mensaje:"Registro no eliminado"});
+        }else{
+            resp.json({mensaje:"Registro eliminado"});
+        }
+    }catch(err){
+        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
+    }
+    
+});
+app.put("/alumnos",async (req,resp)=>{
+    try{
+        const variable = parseInt(req.query.IdUsuario);
+        const objeto = req.body;
+        if (typeof variable !== 'number') {
+            throw new Error('La variable no es un número.');
+        }
+        const conexion = await mysql2.createConnection(dataDeBase);
+        
+        let campos =  Object.keys(objeto);
+        
+        let sentenciasql = "";
+        let cadenaUpdate = "update ejemplo.nombre "
+        let cadenaSet = "SET ";
+        let cadenaWhere = " where ";
+        
+        sentenciasql += cadenaUpdate + cadenaSet;
+        let x = 1;
+        campos.forEach(capos=>{
+            if(x != 1)
+            {
+                sentenciasql += ", "
+            }
+            //console.log(capos+'='+objeto[capos]);
+            if(typeof objeto[capos] === 'string')
+            {
+                sentenciasql += capos + "='" + objeto[capos] + "'";
+            }else
+            {
+                sentenciasql += capos+'='+objeto[capos]
+            }
+            x =2;
+        });
+        sentenciasql += cadenaWhere
+        sentenciasql += campos[0]+' = '+variable;
+        console.log(sentenciasql);
+        const [rows, fields] = await conexion.query(sentenciasql);
+        if(rows.affectedRows == 0){
+            resp.json({mensaje:"Registro sin cambios"});
+        }else{
+            resp.json({mensaje:"Registro tuvo cambios"});
+        }
+    }catch(err){
+        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
+    }
+    
 });
 
-app.listen(8080, () => {
-  console.log('Servidor Express escuchando en el puerto 8080');
+app.patch("/alumnos/:id", async (req, resp) => {
+    try {
+      const variable = parseInt(req.query.IdUsuario);
+      const conexion = await mysql2.createConnection(dataDeBase);
+      const sql = 'UPDATE ejemplo.nombre SET nombre = ?, apellido = ? WHERE id = ?';
+      const { nombre, apellido } = req.body;
+      const [result] = await conexion.execute(sql, [nombre, apellido, variable]);
+      
+      if (result.affectedRows === 0) {
+        resp.status(404).json({ mensaje: "Usuario no encontrado" });
+      } else {
+        resp.json({ mensaje: "Usuario actualizado exitosamente" });
+      }
+    } catch (err) {
+      resp.status(500).json({ mensaje: "Error de conexión", tipo: err.message, sql: err.sqlMessage });
+    }
+  });
+app.get("/alumnos/:id",async (req,resp)=>{
+    try{
+        //req.query o req.body o red.params
+        console.log(req.params.id);
+        const conexion = await mysql2.createConnection(dataDeBase);
+        const [rows, fields] = await conexion.query('select * from ejemplo.nombre where id='+req.params.id);
+        if(rows.length == 0){
+            resp.status(404);
+            resp.json({mensaje:"Usuario no existe"})
+        }else{
+            resp.json(rows);
+        }
+    }catch(err){
+        resp.status(500).json({mensaje: "Error de conexion",tipo: err.message, sql : err.sqlMessage})
+    }
+});
+
+app.listen(8080,(req,resp)=>{
+    console.log("Servidor express escuchando");
 });
