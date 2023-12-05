@@ -4,9 +4,7 @@ La Arquitectura de Transferencia de Estado Representacional (REST) es un estilo 
 
 ## 1. Recursos
 
-En REST, todo es considerado como un recurso. Los recursos son entidades o conceptos que tienen un significado y pueden ser identificados mediante URLs. Por ejemplo:
-
-![Recursos](url_de_la_imagen1.png)
+En REST, todo es considerado como un recurso. Los recursos son entidades o conceptos que tienen un significado y pueden ser identificados mediante URLs.
 
 ## 2. Representaciones
 
