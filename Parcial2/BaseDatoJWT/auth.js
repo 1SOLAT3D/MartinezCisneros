@@ -2,7 +2,7 @@ import {Router} from 'express'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 dotenv.config();
-const PORT = process.env.PORT || 8080; // Define un valor predeterminado si PORT no está definido
+const PORT = process.env.PORT || 8080;
 const authRouter = Router();
 const SECRET_KEY = process.env.SECRET_KEY;
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors');
+const { check, validationResult } = require('express-validator');
 const mysql2 = require("mysql2/promise");
 
 const app = express();
@@ -13,8 +14,13 @@ const dbConfig = {
 };
 
 app.use(cors());
-
 app.use(express.json());
+
+const validateEquipo = [
+  check('nombre').notEmpty().withMessage('Nombre es obligatorio'),
+  check('acronimo').notEmpty().withMessage('Acrónimo es obligatorio'),
+  check('pais').notEmpty().withMessage('País es obligatorio'),
+];
 
 app.get("/lec2023", async (req, res) => {
   try {
@@ -44,14 +50,14 @@ app.get("/lec2023/:idEquipo", async (req, res) => {
   }
 });
 
-app.post("/lec2023", async (req, res) => {
+app.post("/lec2023", validateEquipo, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { nombre, acronimo, pais } = req.body;
-    if (!nombre || !acronimo || !pais) {
-      return res
-        .status(400)
-        .json({ mensaje: "Faltan campos obligatorios en la solicitud" });
-    }
 
     const connection = await mysql2.createConnection(dbConfig);
     const sql = "INSERT INTO equipo (nombre, acronimo, pais) VALUES (?, ?, ?)";
@@ -85,14 +91,14 @@ app.delete("/lec2023/:idEquipo", async (req, res) => {
   }
 });
 
-app.put("/lec2023/:idEquipo", async (req, res) => {
+app.put("/lec2023/:idEquipo", validateEquipo, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { nombre, acronimo, pais } = req.body;
-    if (!nombre || !acronimo || !pais) {
-      return res
-        .status(400)
-        .json({ mensaje: "Faltan campos obligatorios en la solicitud" });
-    }
 
     const connection = await mysql2.createConnection(dbConfig);
     const sql =
@@ -114,7 +120,12 @@ app.put("/lec2023/:idEquipo", async (req, res) => {
   }
 });
 
-app.patch("/lec2023/:idEquipo", async (req, res) => {
+app.patch("/lec2023/:idEquipo", validateEquipo, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { nombre, acronimo, pais } = req.body;
 
